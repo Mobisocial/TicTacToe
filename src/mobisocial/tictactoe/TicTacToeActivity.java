@@ -34,7 +34,6 @@ public class TicTacToeActivity extends Activity {
         // Other demos
         if (Dungbeetle.isDungbeetleIntent(getIntent())) {
             mDungBeetle = Dungbeetle.getInstance(getIntent());
-            mDungBeetle.setLaunchModes(Dungbeetle.LAUNCH_TWO_PLAYERS);
 
             mDungBeetle.getThread().getMembers(); // List of all known people
             mDungBeetle.getThread().getJunction(); // Message-passing without persistence.
@@ -79,7 +78,9 @@ public class TicTacToeActivity extends Activity {
             JSONObject o = new JSONObject();
             JSONArray s = new JSONArray();
             try {
-                // TODO: load state to s
+                for (Button b : mmSquares) {
+                    s.put(b.getText());
+                }
                 o.put("s", s);
             } catch (JSONException e) {
                 Log.wtf(TAG, "Failed to get board state", e);
@@ -94,6 +95,4 @@ public class TicTacToeActivity extends Activity {
             mDungBeetle.getThread().setApplicationState(getApplicationState());
         }
     }
-
-    
 }
