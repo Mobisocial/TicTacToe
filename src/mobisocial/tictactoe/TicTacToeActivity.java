@@ -13,25 +13,33 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 public class TicTacToeActivity extends Activity {
     private static final String TAG = "ttt";
 
     Dungbeetle mDungBeetle;
     private Board mBoard;
-    private Dungbeetle.User mUser;
+    private String mToken;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+        if (!Dungbeetle.isDungbeetleIntent(getIntent())) {
+            Toast.makeText(this, "Please launch with 2-players!", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
         // All app code is in Board.
+        mDungBeetle = Dungbeetle.getInstance(getIntent());
         mBoard = new Board();
+        mBoard.parse(mDungBeetle.getThread().getApplicationState());
+        mToken = (1 == mDungBeetle.getThread().getMemberNumber()) ? "O" : "X";
 
-        
-        
         // Other demos
+        /*
         if (Dungbeetle.isDungbeetleIntent(getIntent())) {
             mDungBeetle = Dungbeetle.getInstance(getIntent());
 
@@ -40,14 +48,17 @@ public class TicTacToeActivity extends Activity {
 
             // sendMessage(...);
             // synState(...);
-        }
+        }*/
     }
 
     class Board implements View.OnClickListener {
-        List<Button> mmSquares;
+        private final List<Button> mmSquares = new ArrayList<Button>();
 
         public Board() {
+            // TODO: It is more efficient to bind each individual
+            // view object to the SocialKit. Can just give root view?
             mmSquares.add((Button)findViewById(R.id.s0));
+            mmSquares.add((Button)findViewById(R.id.s1));
             mmSquares.add((Button)findViewById(R.id.s2));
             mmSquares.add((Button)findViewById(R.id.s3));
             mmSquares.add((Button)findViewById(R.id.s4));
@@ -57,13 +68,11 @@ public class TicTacToeActivity extends Activity {
             mmSquares.add((Button)findViewById(R.id.s8));
             for (int i = 0; i < 9; i++) {
                 mmSquares.get(i).setOnClickListener(this);
+                mmSquares.get(i).setTag(R.id.s0, i);
             }
-
-            parseDb(mDungBeetle.getThread().getApplicationState());
         }
 
-        private void parseDb(JSONObject state) {
-            mmSquares = new ArrayList<Button>();
+        private void parse(JSONObject state) {
             if (!state.has("s")) {
                 return; // empty board initialized.
             }
@@ -90,8 +99,7 @@ public class TicTacToeActivity extends Activity {
 
         @Override
         public void onClick(View v) {
-            mmSquares.get(0).setText(mUser.getAttribute("token"));
-            v.getTag(R.id.s0);
+            mmSquares.get((Integer)v.getTag(R.id.s0)).setText(mToken);
             mDungBeetle.getThread().setApplicationState(getApplicationState());
         }
     }
