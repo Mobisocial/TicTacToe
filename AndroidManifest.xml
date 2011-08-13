@@ -17,8 +17,9 @@
 
 
             <intent-filter>
-                <action android:name="mobisocial.intent.action.TWO_PLAYERS" />
+                <action android:name="mobisocial.intent.action.TWO_PLAYER" />
                 <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 

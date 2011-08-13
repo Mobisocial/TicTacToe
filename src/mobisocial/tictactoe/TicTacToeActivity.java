@@ -73,7 +73,7 @@ public class TicTacToeActivity extends Activity {
         }
 
         private void parse(JSONObject state) {
-            if (!state.has("s")) {
+            if (state == null || !state.has("s")) {
                 return; // empty board initialized.
             }
 
