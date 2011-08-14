@@ -8,6 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import mobisocial.socialkit.SocialKit.Dungbeetle;
+import mobisocial.socialkit.SocialKit.Dungbeetle.StateObserver;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
@@ -33,22 +34,11 @@ public class TicTacToeActivity extends Activity {
             return;
         }
         // All app code is in Board.
-        mDungBeetle = Dungbeetle.getInstance(getIntent());
+        mDungBeetle = Dungbeetle.getInstance(this, getIntent());
+        mDungBeetle.getFeed().registerStateObserver(mStateObserver);
         mBoard = new Board();
-        mBoard.parse(mDungBeetle.getThread().getApplicationState());
-        mToken = (1 == mDungBeetle.getThread().getMemberNumber()) ? "O" : "X";
-
-        // Other demos
-        /*
-        if (Dungbeetle.isDungbeetleIntent(getIntent())) {
-            mDungBeetle = Dungbeetle.getInstance(getIntent());
-
-            mDungBeetle.getThread().getMembers(); // List of all known people
-            mDungBeetle.getThread().getJunction(); // Message-passing without persistence.
-
-            // sendMessage(...);
-            // synState(...);
-        }*/
+        mBoard.parse(mDungBeetle.getFeed().getApplicationState());
+        mToken = (1 == mDungBeetle.getFeed().getMemberNumber()) ? "O" : "X";
     }
 
     class Board implements View.OnClickListener {
@@ -72,7 +62,7 @@ public class TicTacToeActivity extends Activity {
             }
         }
 
-        private void parse(JSONObject state) {
+        private synchronized void parse(JSONObject state) {
             if (state == null || !state.has("s")) {
                 return; // empty board initialized.
             }
@@ -100,7 +90,23 @@ public class TicTacToeActivity extends Activity {
         @Override
         public void onClick(View v) {
             mmSquares.get((Integer)v.getTag(R.id.s0)).setText(mToken);
-            mDungBeetle.getThread().setApplicationState(getApplicationState());
+            mDungBeetle.getFeed().setApplicationState(getApplicationState());
         }
+    }
+
+    private StateObserver mStateObserver = new StateObserver() {
+        @Override
+        public void onUpdate(JSONObject state) {
+            mBoard.parse(state);
+        }
+    };
+
+    private void toast(final String text) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(TicTacToeActivity.this, text, 500).show();
+            }
+        });
     }
 }
