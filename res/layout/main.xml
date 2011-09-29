@@ -94,16 +94,16 @@
     android:orientation="horizontal"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:id="@+id/row2"
     >
-   	<Button android:id="@+id/token"
+    
+    <Button android:id="@+id/token"
     	android:layout_width="wrap_content"
     	android:layout_height="fill_parent"
     	android:layout_margin="10dip"
     	android:textSize="24dip"
     	android:text="  "
     	android:width="90dip"/>
-    	
+
     <Button android:id="@+id/clear"
     	android:layout_width="fill_parent"
     	android:layout_height="fill_parent"
@@ -111,5 +111,13 @@
     	android:textSize="24dip"
     	android:text="@string/clear"
     	android:width="90dip"/>
+</LinearLayout>
+<LinearLayout
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    >
+    <TextView android:layout_width="fill_parent"
+    android:layout_height="wrap_content" android:id="@+id/status"></TextView>
 </LinearLayout>
 </LinearLayout>

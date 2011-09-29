@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class TicTacToeActivity extends Activity {
@@ -44,8 +45,8 @@ public class TicTacToeActivity extends Activity {
         mMultiplayer.setStateObserver(mStateObserver);
 
         mToken = (mMultiplayer.getLocalMemberIndex() == 0) ? "X" : "O";
-        mBoard = new Board();
-        
+
+        mBoard = new Board();        
         mBoard.render(mMusubi.getFeed().getLatestState());
     }
 
@@ -72,15 +73,20 @@ public class TicTacToeActivity extends Activity {
         }
 
         private synchronized void render(JSONObject state) {
+            mTokenButton.setText(mToken);
+
+            String status = "I am player " + mMultiplayer.getLocalMemberIndex()
+                    + " and its " + mMultiplayer.getGlobalMemberCursor() + "s turn.";
+            ((TextView)findViewById(R.id.status)).setText(status);
+
             if (state == null || !state.has("s")) {
                 return; // empty board initialized.
             }
 
-            mTokenButton.setText(mToken);
             JSONArray s = state.optJSONArray("s");
             for (int i = 0; i < 9; i++) {
                 mmSquares.get(i).setText(s.optString(i));
-            }
+            }            
         }
 
         private JSONObject getApplicationState() {
