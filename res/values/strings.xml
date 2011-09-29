@@ -2,4 +2,5 @@
 <resources>
     <string name="hello">Hello World, TicTacToeActivity!</string>
     <string name="app_name">TicTacToe</string>
+    <string name="clear">Clear</string>
 </resources>
