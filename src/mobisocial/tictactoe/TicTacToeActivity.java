@@ -3,9 +3,10 @@ package mobisocial.tictactoe;
 import java.util.ArrayList;
 import java.util.List;
 
+import mobisocial.socialkit.musubi.FeedRenderable;
 import mobisocial.socialkit.musubi.Musubi;
 import mobisocial.socialkit.musubi.Musubi.StateObserver;
-import mobisocial.socialkit.musubi.multiplayer.RoundRobinMultiplayer;
+import mobisocial.socialkit.musubi.multiplayer.TurnBasedMultiplayer;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,7 +24,7 @@ public class TicTacToeActivity extends Activity {
     private static final String TAG = "ttt";
 
     private String mToken;
-    private RoundRobinMultiplayer mMultiplayer;
+    private TurnBasedMultiplayer mMultiplayer;
 
     private Button mTokenButton;
     private final List<Button> mmSquares = new ArrayList<Button>();
@@ -42,7 +43,7 @@ public class TicTacToeActivity extends Activity {
             return;
         }
 
-        mMultiplayer = new RoundRobinMultiplayer(this, getIntent());
+        mMultiplayer = new TurnBasedMultiplayer(this, getIntent());
         mMultiplayer.setStateObserver(mStateObserver);
 
         // Bind UI to actions:
@@ -73,7 +74,7 @@ public class TicTacToeActivity extends Activity {
         mTokenButton.setText(mToken);
 
         String status = "I am player " + mMultiplayer.getLocalMemberIndex()
-                + " and its " + mMultiplayer.getGlobalMemberCursor() + "s turn.";
+                + " and it's " + mMultiplayer.getGlobalMemberCursor() + "s turn.";
         ((TextView)findViewById(R.id.status)).setText(status);
 
         if (state == null || !state.has("s")) {
@@ -91,7 +92,7 @@ public class TicTacToeActivity extends Activity {
      * Computes the local view of the application state,
      * which is stored within the UI itself.
      */
-    private JSONObject getLocalApplicationState() {
+    private JSONObject getState() {
         JSONObject o = new JSONObject();
         JSONArray s = new JSONArray();
         try {
@@ -120,7 +121,7 @@ public class TicTacToeActivity extends Activity {
             }
 
             square.setText(mToken);
-            mMultiplayer.takeTurn(getLocalApplicationState(), getSnapshotHtml());
+            mMultiplayer.takeTurn(getState(), getBoardRendering());
         }
     };
 
@@ -131,20 +132,7 @@ public class TicTacToeActivity extends Activity {
         }
     }
 
-    public String getSnapshotText() {
-        StringBuilder snapshot = new StringBuilder();
-        snapshot.append(" " + mmSquares.get(0).getText() +
-                " | " + mmSquares.get(1).getText() + " | " + mmSquares.get(2).getText());
-        snapshot.append("\n------------\n");
-        snapshot.append(" " + mmSquares.get(3).getText() +
-                " | " + mmSquares.get(4).getText() + " | " + mmSquares.get(5).getText());
-        snapshot.append("\n------------\n");
-        snapshot.append(" " + mmSquares.get(6).getText() +
-                " | " + mmSquares.get(7).getText() + " | " + mmSquares.get(8).getText());
-        return snapshot.toString();
-    }
-
-    public String getSnapshotHtml() {
+    public FeedRenderable getBoardRendering() {
         StringBuilder html = new StringBuilder("<html><head><style>");
         html.append("td { border:1px solid black; min-width:18px; }");
         html.append("table { background-color:#FC6; padding:8px;}");
@@ -162,7 +150,7 @@ public class TicTacToeActivity extends Activity {
         html.append("<td>&nbsp;").append(mmSquares.get(7).getText()).append("</td>");
         html.append("<td>&nbsp;").append(mmSquares.get(8).getText()).append("</td>");
         html.append("</tr></table></body></div></html>");
-        return html.toString();
+        return FeedRenderable.fromHtml(html.toString());
     }
 
     private StateObserver mStateObserver = new StateObserver() {
@@ -172,22 +160,12 @@ public class TicTacToeActivity extends Activity {
         }
     };
 
-    @SuppressWarnings("unused")
-    private void toast(final String text) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(TicTacToeActivity.this, text, 500).show();
-            }
-        });
-    }
-
     private View.OnClickListener mClearAll = new View.OnClickListener() {
         @Override
         public void onClick(View arg0) {
             if (mMultiplayer.isMyTurn()) {
                 clearBoard();
-                mMultiplayer.takeTurn(getLocalApplicationState(), getSnapshotHtml());
+                mMultiplayer.takeTurn(getState(), getBoardRendering());
             }
         }
     };
