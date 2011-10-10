@@ -72,9 +72,13 @@ public class TicTacToeActivity extends Activity {
      */
     private void render(JSONObject state) {
         mTokenButton.setText(mToken);
-
-        String status = "I am player " + mMultiplayer.getLocalMemberIndex()
-                + " and it's " + mMultiplayer.getGlobalMemberCursor() + "s turn.";
+        String status;
+        if (mMultiplayer.isMyTurn()) {
+            status = "Your turn.";
+        } else {
+            status = mMultiplayer.getUser(mMultiplayer.getGlobalMemberCursor()).getName()
+                    + "'s turn.";
+        }
         ((TextView)findViewById(R.id.status)).setText(status);
 
         if (state == null || !state.has("s")) {
@@ -149,13 +153,16 @@ public class TicTacToeActivity extends Activity {
         html.append("<td>&nbsp;").append(mmSquares.get(6).getText()).append("</td>");
         html.append("<td>&nbsp;").append(mmSquares.get(7).getText()).append("</td>");
         html.append("<td>&nbsp;").append(mmSquares.get(8).getText()).append("</td>");
-        html.append("</tr></table></body></div></html>");
+        html.append("</tr></table></body></div>");
+        //html.append("<p>" + status + "</p>");
+        html.append("</html>");
         return FeedRenderable.fromHtml(html.toString());
     }
 
     private StateObserver mStateObserver = new StateObserver() {
         @Override
         public void onUpdate(JSONObject state) {
+            Log.d(TAG, "TTT GOT STATE " + state);
             render(state);
         }
     };
