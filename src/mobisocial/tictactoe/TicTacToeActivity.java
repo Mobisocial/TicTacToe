@@ -3,9 +3,10 @@ package mobisocial.tictactoe;
 import java.util.ArrayList;
 import java.util.List;
 
-import mobisocial.socialkit.musubi.FeedRenderable;
+import mobisocial.socialkit.User;
 import mobisocial.socialkit.musubi.Musubi;
 import mobisocial.socialkit.musubi.Musubi.StateObserver;
+import mobisocial.socialkit.musubi.multiplayer.FeedRenderable;
 import mobisocial.socialkit.musubi.multiplayer.TurnBasedMultiplayer;
 
 import org.json.JSONArray;
@@ -17,6 +18,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,6 +26,7 @@ public class TicTacToeActivity extends Activity {
     private static final String TAG = "ttt";
 
     private String mToken;
+    private Musubi mMusubi;
     private TurnBasedMultiplayer mMultiplayer;
 
     private Button mTokenButton;
@@ -42,8 +45,8 @@ public class TicTacToeActivity extends Activity {
             finish();
             return;
         }
-
-        mMultiplayer = new TurnBasedMultiplayer(this, getIntent());
+        mMusubi = Musubi.getInstance(this);
+        mMultiplayer = new TurnBasedMultiplayer(mMusubi, getIntent());
         mMultiplayer.setStateObserver(mStateObserver);
 
         // Bind UI to actions:
@@ -73,13 +76,15 @@ public class TicTacToeActivity extends Activity {
     private void render(JSONObject state) {
         mTokenButton.setText(mToken);
         String status;
+        User user = mMultiplayer.getUser(mMultiplayer.getGlobalMemberCursor());
         if (mMultiplayer.isMyTurn()) {
             status = "Your turn.";
         } else {
-            status = mMultiplayer.getUser(mMultiplayer.getGlobalMemberCursor()).getName()
+            status = user.getName()
                     + "'s turn.";
         }
         ((TextView)findViewById(R.id.status)).setText(status);
+        ((ImageView)findViewById(R.id.image)).setImageBitmap(user.getPicture());
 
         if (state == null || !state.has("s")) {
             clearBoard();

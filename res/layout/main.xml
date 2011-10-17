@@ -117,7 +117,11 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     >
-    <TextView android:layout_width="fill_parent"
+    <TextView android:layout_width="wrap_content"
     android:layout_height="wrap_content" android:id="@+id/status"></TextView>
+    <ImageView  
+    	android:id="@+id/image"
+    	android:layout_width="wrap_content"
+	    android:layout_height="wrap_content" />
 </LinearLayout>
 </LinearLayout>
