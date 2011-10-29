@@ -3,9 +3,10 @@ package mobisocial.tictactoe;
 import java.util.ArrayList;
 import java.util.List;
 
+import mobisocial.socialkit.Obj;
 import mobisocial.socialkit.User;
+import mobisocial.socialkit.musubi.FeedObserver;
 import mobisocial.socialkit.musubi.Musubi;
-import mobisocial.socialkit.musubi.Musubi.StateObserver;
 import mobisocial.socialkit.musubi.multiplayer.FeedRenderable;
 import mobisocial.socialkit.musubi.multiplayer.TurnBasedMultiplayer;
 
@@ -164,11 +165,11 @@ public class TicTacToeActivity extends Activity {
         return FeedRenderable.fromHtml(html.toString());
     }
 
-    private StateObserver mStateObserver = new StateObserver() {
+    private FeedObserver mStateObserver = new FeedObserver() {
         @Override
-        public void onUpdate(JSONObject state) {
-            Log.d(TAG, "TTT GOT STATE " + state);
-            render(state);
+        public void onUpdate(Obj obj) {
+            Log.d(TAG, "TTT GOT STATE " + obj);
+            render(obj.getJson());
         }
     };
 
