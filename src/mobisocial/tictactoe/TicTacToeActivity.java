@@ -9,6 +9,7 @@ import mobisocial.socialkit.musubi.FeedObserver;
 import mobisocial.socialkit.musubi.Musubi;
 import mobisocial.socialkit.musubi.multiplayer.FeedRenderable;
 import mobisocial.socialkit.musubi.multiplayer.TurnBasedMultiplayer;
+import mobisocial.socialkit.musubi.multiplayer.TurnBasedMultiplayer.StateObserver;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -165,13 +166,11 @@ public class TicTacToeActivity extends Activity {
         return FeedRenderable.fromHtml(html.toString());
     }
 
-    private FeedObserver mStateObserver = new FeedObserver() {
+    private StateObserver mStateObserver = new StateObserver() {
         @Override
-        public void onUpdate(Obj obj) {
-            Log.d(TAG, "TTT GOT STATE " + obj.getJson());
-            if (obj.getJson().has("state")) {
-                render(obj.getJson().optJSONObject("state"));
-            }
+        public void onUpdate(JSONObject obj) {
+            Log.d(TAG, "TTT GOT STATE " + obj);
+            render(obj);
         }
     };
 
