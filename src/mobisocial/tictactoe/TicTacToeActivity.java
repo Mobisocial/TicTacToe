@@ -168,8 +168,10 @@ public class TicTacToeActivity extends Activity {
     private FeedObserver mStateObserver = new FeedObserver() {
         @Override
         public void onUpdate(Obj obj) {
-            Log.d(TAG, "TTT GOT STATE " + obj);
-            render(obj.getJson());
+            Log.d(TAG, "TTT GOT STATE " + obj.getJson());
+            if (obj.getJson().has("state")) {
+                render(obj.getJson().optJSONObject("state"));
+            }
         }
     };
 
