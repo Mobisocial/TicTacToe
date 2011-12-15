@@ -3,13 +3,11 @@ package mobisocial.tictactoe;
 import java.util.ArrayList;
 import java.util.List;
 
-import mobisocial.socialkit.Obj;
-import mobisocial.socialkit.User;
-import mobisocial.socialkit.musubi.FeedObserver;
+import mobisocial.socialkit.musubi.DbObj;
+import mobisocial.socialkit.musubi.DbUser;
 import mobisocial.socialkit.musubi.Musubi;
 import mobisocial.socialkit.musubi.multiplayer.FeedRenderable;
 import mobisocial.socialkit.musubi.multiplayer.TurnBasedMultiplayer;
-import mobisocial.socialkit.musubi.multiplayer.TurnBasedMultiplayer.StateObserver;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,7 +27,7 @@ public class TicTacToeActivity extends Activity {
 
     private String mToken;
     private Musubi mMusubi;
-    private TurnBasedMultiplayer mMultiplayer;
+    private TTTMultiplayer mMultiplayer;
 
     private Button mTokenButton;
     private final List<Button> mmSquares = new ArrayList<Button>();
@@ -48,8 +46,7 @@ public class TicTacToeActivity extends Activity {
             return;
         }
         mMusubi = Musubi.getInstance(this);
-        mMultiplayer = new TurnBasedMultiplayer(mMusubi, getIntent());
-        mMultiplayer.setStateObserver(mStateObserver);
+        mMultiplayer = new TTTMultiplayer(mMusubi.getObj());
 
         // Bind UI to actions:
         mmSquares.add((Button)findViewById(R.id.s0));
@@ -78,7 +75,7 @@ public class TicTacToeActivity extends Activity {
     private void render(JSONObject state) {
         mTokenButton.setText(mToken);
         String status;
-        User user = mMultiplayer.getUser(mMultiplayer.getGlobalMemberCursor());
+        DbUser user = mMultiplayer.getUser(mMultiplayer.getGlobalMemberCursor());
         if (mMultiplayer.isMyTurn()) {
             status = "Your turn.";
         } else {
@@ -87,11 +84,6 @@ public class TicTacToeActivity extends Activity {
         }
         ((TextView)findViewById(R.id.status)).setText(status);
         ((ImageView)findViewById(R.id.image)).setImageBitmap(user.getPicture());
-
-        if (state == null || !state.has("s")) {
-            clearBoard();
-            return; // empty board initialized.
-        }
 
         JSONArray s = state.optJSONArray("s");
         for (int i = 0; i < 9; i++) {
@@ -117,6 +109,20 @@ public class TicTacToeActivity extends Activity {
         return o;
     }
 
+    private JSONObject getEmptyState() {
+        JSONObject o = new JSONObject();
+        JSONArray s = new JSONArray();
+        try {
+            for (int i = 0; i < 9; i++) {
+                s.put(BLANK);
+            }
+            o.put("s", s);
+        } catch (JSONException e) {
+            Log.wtf(TAG, "Failed to get board state", e);
+        }
+        return o;
+    }
+
     private View.OnClickListener mBoardClickedListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -132,7 +138,7 @@ public class TicTacToeActivity extends Activity {
             }
 
             square.setText(mToken);
-            mMultiplayer.takeTurn(getState(), getBoardRendering());
+            mMultiplayer.takeTurn(getState());
         }
     };
 
@@ -143,44 +149,63 @@ public class TicTacToeActivity extends Activity {
         }
     }
 
-    public FeedRenderable getBoardRendering() {
-        StringBuilder html = new StringBuilder("<html><head><style>");
-        html.append("td { border:1px solid black; min-width:18px; }");
-        html.append("table { background-color:#FC6; padding:8px;}");
-        html.append("</style></head>");
-        html.append("<body><div><table><tr>");
-        html.append("<td>&nbsp;").append(mmSquares.get(0).getText()).append("</td>");
-        html.append("<td>&nbsp;").append(mmSquares.get(1).getText()).append("</td>");
-        html.append("<td>&nbsp;").append(mmSquares.get(2).getText()).append("</td>");
-        html.append("</tr><tr>");
-        html.append("<td>&nbsp;").append(mmSquares.get(3).getText()).append("</td>");
-        html.append("<td>&nbsp;").append(mmSquares.get(4).getText()).append("</td>");
-        html.append("<td>&nbsp;").append(mmSquares.get(5).getText()).append("</td>");
-        html.append("</tr><tr>");
-        html.append("<td>&nbsp;").append(mmSquares.get(6).getText()).append("</td>");
-        html.append("<td>&nbsp;").append(mmSquares.get(7).getText()).append("</td>");
-        html.append("<td>&nbsp;").append(mmSquares.get(8).getText()).append("</td>");
-        html.append("</tr></table></body></div>");
-        //html.append("<p>" + status + "</p>");
-        html.append("</html>");
-        return FeedRenderable.fromHtml(html.toString());
-    }
-
-    private StateObserver mStateObserver = new StateObserver() {
-        @Override
-        public void onUpdate(JSONObject obj) {
-            Log.d(TAG, "TTT GOT STATE " + obj);
-            render(obj);
-        }
-    };
-
     private View.OnClickListener mClearAll = new View.OnClickListener() {
         @Override
         public void onClick(View arg0) {
-            if (mMultiplayer.isMyTurn()) {
-                clearBoard();
-                mMultiplayer.takeTurn(getState(), getBoardRendering());
-            }
+            mMultiplayer.takeTurnOutOfOrder(mMultiplayer.membersJsonArray(), 0, getEmptyState());
         }
     };
+
+    private class TTTMultiplayer extends TurnBasedMultiplayer {
+        public TTTMultiplayer(DbObj objContext) {
+            super(objContext);
+        }
+
+        @Override
+        protected JSONObject getInitialState() {
+            JSONObject wrapper = new JSONObject();
+            JSONArray spaces = new JSONArray();
+            for (int i = 0; i < 9; i++) {
+                spaces.put(BLANK);
+            }
+            try {
+                wrapper.put("s", spaces);
+            } catch (JSONException e) {}
+            return wrapper;
+        };
+
+        @Override
+        protected void onStateUpdate(JSONObject state) {
+            render(state);
+        }
+
+        @Override
+        protected FeedRenderable getFeedView(JSONObject state) {
+            try {
+            JSONArray squares = state.getJSONArray("s");
+            StringBuilder html = new StringBuilder("<html><head><style>");
+            html.append("td { border:1px solid black; min-width:18px; }");
+            html.append("table { background-color:#FC6; padding:8px;}");
+            html.append("</style></head>");
+            html.append("<body><div><table><tr>");
+            html.append("<td>&nbsp;").append(squares.get(0)).append("</td>");
+            html.append("<td>&nbsp;").append(squares.get(1)).append("</td>");
+            html.append("<td>&nbsp;").append(squares.get(2)).append("</td>");
+            html.append("</tr><tr>");
+            html.append("<td>&nbsp;").append(squares.get(3)).append("</td>");
+            html.append("<td>&nbsp;").append(squares.get(4)).append("</td>");
+            html.append("<td>&nbsp;").append(squares.get(5)).append("</td>");
+            html.append("</tr><tr>");
+            html.append("<td>&nbsp;").append(squares.get(6)).append("</td>");
+            html.append("<td>&nbsp;").append(squares.get(7)).append("</td>");
+            html.append("<td>&nbsp;").append(squares.get(8)).append("</td>");
+            html.append("</tr></table></body></div>");
+            html.append("</html>");
+            return FeedRenderable.fromHtml(html.toString());
+            } catch (JSONException e) {
+                Log.e(TAG, "Error getting renderable state");
+                return FeedRenderable.fromText("[TicTacToe rendering error]");
+            }
+        }
+    }
 }
