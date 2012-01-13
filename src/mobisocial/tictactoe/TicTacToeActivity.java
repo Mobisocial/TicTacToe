@@ -26,7 +26,6 @@ public class TicTacToeActivity extends Activity {
     private static final String TAG = "ttt";
 
     private String mToken;
-    private Musubi mMusubi;
     private TTTMultiplayer mMultiplayer;
 
     private Button mTokenButton;
@@ -45,8 +44,8 @@ public class TicTacToeActivity extends Activity {
             finish();
             return;
         }
-        mMusubi = Musubi.getInstance(this);
-        mMultiplayer = new TTTMultiplayer(mMusubi.getObj());
+
+        mMultiplayer = new TTTMultiplayer(Musubi.getContextObj(getIntent()));
 
         // Bind UI to actions:
         mmSquares.add((Button)findViewById(R.id.s0));
