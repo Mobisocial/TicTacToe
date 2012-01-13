@@ -109,7 +109,7 @@ public class TicTacToeActivity extends Activity {
         return o;
     }
 
-    private JSONObject getEmptyState() {
+    private JSONObject getClearedBoard() {
         JSONObject o = new JSONObject();
         JSONArray s = new JSONArray();
         try {
@@ -152,7 +152,7 @@ public class TicTacToeActivity extends Activity {
     private View.OnClickListener mClearAll = new View.OnClickListener() {
         @Override
         public void onClick(View arg0) {
-            mMultiplayer.takeTurnOutOfOrder(mMultiplayer.membersJsonArray(), 0, getEmptyState());
+            mMultiplayer.takeTurnOutOfOrder(mMultiplayer.membersJsonArray(), 0, getClearedBoard());
         }
     };
 
@@ -163,15 +163,7 @@ public class TicTacToeActivity extends Activity {
 
         @Override
         protected JSONObject getInitialState() {
-            JSONObject wrapper = new JSONObject();
-            JSONArray spaces = new JSONArray();
-            for (int i = 0; i < 9; i++) {
-                spaces.put(BLANK);
-            }
-            try {
-                wrapper.put("s", spaces);
-            } catch (JSONException e) {}
-            return wrapper;
+            return getClearedBoard();
         };
 
         @Override
