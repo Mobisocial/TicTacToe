@@ -40,11 +40,15 @@ public class TicTacToeActivity extends Activity {
         mTokenButton = (Button)findViewById(R.id.token);
 
         if (!Musubi.isMusubiIntent(getIntent())) {
+            // Our simple app must be launched from Musubi.
+            // The intent filter in our AndroidManifest.xml handles this,
+            // but just in case:
             Toast.makeText(this, "Please launch with 2-players!", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
+        // Set up the game's backend:
         mMultiplayer = new TTTMultiplayer(Musubi.getContextObj(this, getIntent()));
 
         // Bind UI to actions:
@@ -63,13 +67,17 @@ public class TicTacToeActivity extends Activity {
         }
         ((Button)findViewById(R.id.clear)).setOnClickListener(mClearAll);
 
+        // First player is X, second is O. getLocalMemberIndex() returns
+        // the player corresponding to this device:
         mToken = (mMultiplayer.getLocalMemberIndex() == 0) ? "X" : "O";
+
+        // Display the game's current state:
         render(mMultiplayer.getLatestState());
     }
 
     /**
-     * Extracts the board state from the given object
-     * and renders it to screen.
+     * Extracts the board state from the given json object and
+     * renders it to screen.
      */
     private void render(JSONObject state) {
         mTokenButton.setText(mToken);
@@ -78,12 +86,13 @@ public class TicTacToeActivity extends Activity {
         if (mMultiplayer.isMyTurn()) {
             status = "Your turn.";
         } else {
-            status = user.getName()
-                    + "'s turn.";
+            status = user.getName() + "'s turn.";
         }
+
         ((TextView)findViewById(R.id.status)).setText(status);
         ((ImageView)findViewById(R.id.image)).setImageBitmap(user.getPicture());
 
+        // The game state is completely stored in the UI as the labels of our buttons:
         JSONArray s = state.optJSONArray("s");
         for (int i = 0; i < 9; i++) {
             mmSquares.get(i).setText(s.optString(i));
@@ -91,8 +100,8 @@ public class TicTacToeActivity extends Activity {
     }
 
     /**
-     * Computes the local view of the application state,
-     * which is stored within the UI itself.
+     * Computes the local view of the application state
+     * and returns it as a JSON object.
      */
     private JSONObject getState() {
         JSONObject o = new JSONObject();
@@ -108,6 +117,9 @@ public class TicTacToeActivity extends Activity {
         return o;
     }
 
+    /**
+     * Returns the state of an empty board.
+     */
     private JSONObject getClearedBoard() {
         JSONObject o = new JSONObject();
         JSONArray s = new JSONArray();
@@ -125,8 +137,7 @@ public class TicTacToeActivity extends Activity {
     private View.OnClickListener mBoardClickedListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            // This call isn't necessary, since takeTurn() checks internally.
-            // But it seems like a good thing to do.
+            // This call isn't necessary, since takeTurn() checks internally. But it doesn't hurt.
             if (!mMultiplayer.isMyTurn()) {
                 return;
             }
@@ -135,18 +146,10 @@ public class TicTacToeActivity extends Activity {
             if (!square.getText().equals(BLANK)) {
                 return;
             }
-
             square.setText(mToken);
             mMultiplayer.takeTurn(getState());
         }
     };
-
-
-    public void clearBoard() {
-        for (int i = 0; i < 9; i++) {
-            mmSquares.get(i).setText(BLANK);
-        }
-    }
 
     private View.OnClickListener mClearAll = new View.OnClickListener() {
         @Override
@@ -173,32 +176,41 @@ public class TicTacToeActivity extends Activity {
         @Override
         protected FeedRenderable getFeedView(JSONObject state) {
             try {
-            JSONArray squares = state.getJSONArray("s");
-            StringBuilder html = new StringBuilder("<html><head><style>");
-            html.append("td { min-width:18px; }");
-            html.append("table { padding:8px; border-collapse: collapse;}");
-            html.append(".left { border-right:1px solid black; }");
-            html.append(".right { border-left:1px solid black; }");
-            html.append(".top { border-bottom:1px solid black; }");
-            html.append(".bottom { border-top:1px solid black; }");
-            html.append("</style></head>");
-            html.append("<body><div><table><tr>");
-            html.append("<td class=\"left top\">&nbsp;").append(squares.getString(0)).append("</td>");
-            html.append("<td class=\"top\">&nbsp;").append(squares.getString(1)).append("</td>");
-            html.append("<td class=\"right top\">&nbsp;").append(squares.getString(2)).append("</td>");
-            html.append("</tr><tr>");
-            html.append("<td class=\"left\">&nbsp;").append(squares.getString(3)).append("</td>");
-            html.append("<td class=\"\">&nbsp;").append(squares.getString(4)).append("</td>");
-            html.append("<td class=\"right\">&nbsp;").append(squares.getString(5)).append("</td>");
-            html.append("</tr><tr>");
-            html.append("<td class=\"left bottom\">&nbsp;").append(squares.getString(6)).append("</td>");
-            html.append("<td class=\"bottom\">&nbsp;").append(squares.getString(7)).append("</td>");
-            html.append("<td class=\"right bottom\">&nbsp;").append(squares.getString(8)).append("</td>");
-            html.append("</tr></table></body></div>");
-            html.append("</html>");
-            return FeedRenderable.fromHtml(html.toString());
+                JSONArray squares = state.getJSONArray("s");
+                StringBuilder html = new StringBuilder("<html><head><style>")
+                    .append("td { min-width:18px; }")
+                    .append("table { padding:8px; border-collapse: collapse;}")
+                    .append(".left { border-right:1px solid black; }")
+                    .append(".right { border-left:1px solid black; }")
+                    .append(".top { border-bottom:1px solid black; }")
+                    .append(".bottom { border-top:1px solid black; }")
+                    .append("</style></head>")
+                    .append("<body><div><table><tr>")
+                        .append("<td class=\"left top\">&nbsp;")
+                        .append(squares.getString(0)).append("</td>")
+                        .append("<td class=\"top\">&nbsp;")
+                        .append(squares.getString(1)).append("</td>")
+                        .append("<td class=\"right top\">&nbsp;")
+                        .append(squares.getString(2)).append("</td>")
+                    .append("</tr><tr>")
+                        .append("<td class=\"left\">&nbsp;")
+                        .append(squares.getString(3)).append("</td>")
+                        .append("<td class=\"\">&nbsp;")
+                        .append(squares.getString(4)).append("</td>")
+                        .append("<td class=\"right\">&nbsp;")
+                        .append(squares.getString(5)).append("</td>")
+                    .append("</tr><tr>")
+                        .append("<td class=\"left bottom\">&nbsp;")
+                        .append(squares.getString(6)).append("</td>")
+                        .append("<td class=\"bottom\">&nbsp;")
+                        .append(squares.getString(7)).append("</td>")
+                        .append("<td class=\"right bottom\">&nbsp;")
+                        .append(squares.getString(8)).append("</td>")
+                    .append("</tr></table></body></div>")
+                    .append("</html>");
+                return FeedRenderable.fromHtml(html.toString());
             } catch (JSONException e) {
-                Log.e(TAG, "Error getting renderable state");
+                Log.wtf(TAG, "Error getting renderable state");
                 return FeedRenderable.fromText("[TicTacToe rendering error]");
             }
         }
