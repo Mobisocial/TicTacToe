@@ -8,14 +8,6 @@
     <application android:icon="@drawable/icon" android:label="@string/app_name">
         <activity android:name=".TicTacToeActivity"
                   android:label="@string/app_name">
-
-             <!-- TODO: Move to home activity -->
-             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-
-
             <intent-filter>
                 <action android:name="mobisocial.intent.action.TWO_PLAYERS" />
                 <category android:name="android.intent.category.LAUNCHER" />
