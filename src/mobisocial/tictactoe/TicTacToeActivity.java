@@ -65,7 +65,7 @@ public class TicTacToeActivity extends Activity {
             mmSquares.get(i).setOnClickListener(mBoardClickedListener);
             mmSquares.get(i).setTag(R.id.s0, i);
         }
-        ((Button)findViewById(R.id.clear)).setOnClickListener(mClearAll);
+        findViewById(R.id.clear).setOnClickListener(mClearAll);
 
         // First player is X, second is O. getLocalMemberIndex() returns
         // the player corresponding to this device:
