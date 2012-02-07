@@ -174,26 +174,28 @@ public class TicTacToeActivity extends Activity {
         protected FeedRenderable getFeedView(JSONObject state) {
             try {
             JSONArray squares = state.getJSONArray("s");
-            Log.d(TAG, "HAVE STATE " + state + " : " + squares);
             StringBuilder html = new StringBuilder("<html><head><style>");
-            html.append("td { border:1px solid black; min-width:18px; }");
+            html.append("td { min-width:18px; }");
             html.append("table { padding:8px; border-collapse: collapse;}");
+            html.append(".left { border-right:1px solid black; }");
+            html.append(".right { border-left:1px solid black; }");
+            html.append(".top { border-bottom:1px solid black; }");
+            html.append(".bottom { border-top:1px solid black; }");
             html.append("</style></head>");
             html.append("<body><div><table><tr>");
-            html.append("<td>&nbsp;").append(squares.getString(0)).append("</td>");
-            html.append("<td>&nbsp;").append(squares.getString(1)).append("</td>");
-            html.append("<td>&nbsp;").append(squares.getString(2)).append("</td>");
+            html.append("<td class=\"left top\">&nbsp;").append(squares.getString(0)).append("</td>");
+            html.append("<td class=\"top\">&nbsp;").append(squares.getString(1)).append("</td>");
+            html.append("<td class=\"right top\">&nbsp;").append(squares.getString(2)).append("</td>");
             html.append("</tr><tr>");
-            html.append("<td>&nbsp;").append(squares.getString(3)).append("</td>");
-            html.append("<td>&nbsp;").append(squares.getString(4)).append("</td>");
-            html.append("<td>&nbsp;").append(squares.getString(5)).append("</td>");
+            html.append("<td class=\"left\">&nbsp;").append(squares.getString(3)).append("</td>");
+            html.append("<td class=\"\">&nbsp;").append(squares.getString(4)).append("</td>");
+            html.append("<td class=\"right\">&nbsp;").append(squares.getString(5)).append("</td>");
             html.append("</tr><tr>");
-            html.append("<td>&nbsp;").append(squares.getString(6)).append("</td>");
-            html.append("<td>&nbsp;").append(squares.getString(7)).append("</td>");
-            html.append("<td>&nbsp;").append(squares.getString(8)).append("</td>");
+            html.append("<td class=\"left bottom\">&nbsp;").append(squares.getString(6)).append("</td>");
+            html.append("<td class=\"bottom\">&nbsp;").append(squares.getString(7)).append("</td>");
+            html.append("<td class=\"right bottom\">&nbsp;").append(squares.getString(8)).append("</td>");
             html.append("</tr></table></body></div>");
             html.append("</html>");
-            Log.d(TAG, "SO HTML " + html);
             return FeedRenderable.fromHtml(html.toString());
             } catch (JSONException e) {
                 Log.e(TAG, "Error getting renderable state");
