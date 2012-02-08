@@ -25,9 +25,7 @@ import android.widget.Toast;
 public class TicTacToeActivity extends Activity {
     private static final String TAG = "ttt";
 
-    private String mToken;
     private TTTMultiplayer mMultiplayer;
-
     private Button mTokenButton;
     private final List<Button> mmSquares = new ArrayList<Button>();
 
@@ -67,10 +65,6 @@ public class TicTacToeActivity extends Activity {
         }
         findViewById(R.id.clear).setOnClickListener(mClearAll);
 
-        // First player is X, second is O. getLocalMemberIndex() returns
-        // the player corresponding to this device:
-        mToken = (mMultiplayer.getLocalMemberIndex() == 0) ? "X" : "O";
-
         // Display the game's current state:
         render(mMultiplayer.getLatestState());
     }
@@ -80,7 +74,7 @@ public class TicTacToeActivity extends Activity {
      * renders it to screen.
      */
     private void render(JSONObject state) {
-        mTokenButton.setText(mToken);
+        mTokenButton.setText(mMultiplayer.getPlayerToken());
         String status;
         DbUser user = mMultiplayer.getUser(mMultiplayer.getGlobalMemberCursor());
         if (mMultiplayer.isMyTurn()) {
@@ -117,23 +111,6 @@ public class TicTacToeActivity extends Activity {
         return o;
     }
 
-    /**
-     * Returns the state of an empty board.
-     */
-    private JSONObject getClearedBoard() {
-        JSONObject o = new JSONObject();
-        JSONArray s = new JSONArray();
-        try {
-            for (int i = 0; i < 9; i++) {
-                s.put(BLANK);
-            }
-            o.put("s", s);
-        } catch (JSONException e) {
-            Log.wtf(TAG, "Failed to get board state", e);
-        }
-        return o;
-    }
-
     private View.OnClickListener mBoardClickedListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -146,7 +123,7 @@ public class TicTacToeActivity extends Activity {
             if (!square.getText().equals(BLANK)) {
                 return;
             }
-            square.setText(mToken);
+            square.setText(mMultiplayer.getPlayerToken());
             mMultiplayer.takeTurn(getState());
         }
     };
@@ -154,13 +131,24 @@ public class TicTacToeActivity extends Activity {
     private View.OnClickListener mClearAll = new View.OnClickListener() {
         @Override
         public void onClick(View arg0) {
-            mMultiplayer.takeTurnOutOfOrder(mMultiplayer.membersJsonArray(), 0, getClearedBoard());
+            mMultiplayer.takeTurnOutOfOrder(
+                    mMultiplayer.membersJsonArray(), 0, mMultiplayer.getClearedBoard());
         }
     };
 
     private class TTTMultiplayer extends TurnBasedMultiplayer {
+        private final String mToken;
+
         public TTTMultiplayer(DbObj objContext) {
             super(objContext);
+            // First player is X, second is O. getLocalMemberIndex() returns
+            // the player corresponding to this device:
+            mToken = (getLocalMemberIndex() == 0) ? "X" : "O";
+
+        }
+
+        public String getPlayerToken() {
+            return mToken;
         }
 
         @Override
@@ -213,6 +201,23 @@ public class TicTacToeActivity extends Activity {
                 Log.wtf(TAG, "Error getting renderable state");
                 return FeedRenderable.fromText("[TicTacToe rendering error]");
             }
+        }
+
+        /**
+         * Returns the state of an empty board.
+         */
+        JSONObject getClearedBoard() {
+            JSONObject o = new JSONObject();
+            JSONArray s = new JSONArray();
+            try {
+                for (int i = 0; i < 9; i++) {
+                    s.put(BLANK);
+                }
+                o.put("s", s);
+            } catch (JSONException e) {
+                Log.wtf(TAG, "Failed to get board state", e);
+            }
+            return o;
         }
     }
 }
