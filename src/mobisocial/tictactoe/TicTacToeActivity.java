@@ -61,7 +61,7 @@ public class TicTacToeActivity extends Activity {
         mmSquares.add((Button)findViewById(R.id.s8));
         for (int i = 0; i < 9; i++) {
             mmSquares.get(i).setOnClickListener(mBoardClickedListener);
-            mmSquares.get(i).setTag(R.id.s0, i);
+            mmSquares.get(i).setTag(i);
         }
         findViewById(R.id.clear).setOnClickListener(mClearAll);
 
@@ -119,7 +119,7 @@ public class TicTacToeActivity extends Activity {
                 return;
             }
 
-            Button square = mmSquares.get((Integer)v.getTag(R.id.s0));
+            Button square = mmSquares.get((Integer)v.getTag());
             if (!square.getText().equals(BLANK)) {
                 return;
             }
