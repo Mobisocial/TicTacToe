@@ -3,11 +3,11 @@ package mobisocial.tictactoe;
 import java.util.ArrayList;
 import java.util.List;
 
+import mobisocial.socialkit.musubi.DbIdentity;
 import mobisocial.socialkit.musubi.DbObj;
-import mobisocial.socialkit.musubi.DbUser;
 import mobisocial.socialkit.musubi.Musubi;
 import mobisocial.socialkit.musubi.multiplayer.FeedRenderable;
-import mobisocial.socialkit.musubi.multiplayer.TurnBasedMultiplayer;
+import mobisocial.socialkit.musubi.multiplayer.TurnBasedApp;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,7 +20,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class TicTacToeActivity extends Activity {
     private static final String TAG = "ttt";
@@ -29,22 +28,13 @@ public class TicTacToeActivity extends Activity {
     private Button mTokenButton;
     private final List<Button> mmSquares = new ArrayList<Button>();
 
-    private final String BLANK = "  ";
+    private static final String BLANK = "  ";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         mTokenButton = (Button)findViewById(R.id.token);
-
-        if (!Musubi.isMusubiIntent(getIntent())) {
-            // Our simple app must be launched from Musubi.
-            // The intent filter in our AndroidManifest.xml handles this,
-            // but just in case:
-            Toast.makeText(this, "Please launch with 2-players!", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
 
         // Set up the game's backend:
         mMultiplayer = new TTTMultiplayer(Musubi.getContextObj(this, getIntent()));
@@ -76,7 +66,7 @@ public class TicTacToeActivity extends Activity {
     private void render(JSONObject state) {
         mTokenButton.setText(mMultiplayer.getPlayerToken());
         String status;
-        DbUser user = mMultiplayer.getUser(mMultiplayer.getGlobalMemberCursor());
+        DbIdentity user = mMultiplayer.getUser(mMultiplayer.getGlobalMemberCursor());
         if (mMultiplayer.isMyTurn()) {
             status = "Your turn.";
         } else {
@@ -132,11 +122,11 @@ public class TicTacToeActivity extends Activity {
         @Override
         public void onClick(View arg0) {
             mMultiplayer.takeTurnOutOfOrder(
-                    mMultiplayer.membersJsonArray(), 0, mMultiplayer.getClearedBoard());
+                    mMultiplayer.membersJsonArray(), 0, getInitialState());
         }
     };
 
-    private class TTTMultiplayer extends TurnBasedMultiplayer {
+    private class TTTMultiplayer extends TurnBasedApp {
         private final String mToken;
 
         public TTTMultiplayer(DbObj objContext) {
@@ -150,11 +140,6 @@ public class TicTacToeActivity extends Activity {
         public String getPlayerToken() {
             return mToken;
         }
-
-        @Override
-        protected JSONObject getInitialState() {
-            return getClearedBoard();
-        };
 
         @Override
         protected void onStateUpdate(JSONObject state) {
@@ -202,22 +187,19 @@ public class TicTacToeActivity extends Activity {
                 return FeedRenderable.fromText("[TicTacToe rendering error]");
             }
         }
-
-        /**
-         * Returns the state of an empty board.
-         */
-        JSONObject getClearedBoard() {
-            JSONObject o = new JSONObject();
-            JSONArray s = new JSONArray();
-            try {
-                for (int i = 0; i < 9; i++) {
-                    s.put(BLANK);
-                }
-                o.put("s", s);
-            } catch (JSONException e) {
-                Log.wtf(TAG, "Failed to get board state", e);
-            }
-            return o;
-        }
     }
+
+    public static JSONObject getInitialState() {
+        JSONObject o = new JSONObject();
+        JSONArray s = new JSONArray();
+        try {
+            for (int i = 0; i < 9; i++) {
+                s.put(BLANK);
+            }
+            o.put("s", s);
+        } catch (JSONException e) {
+            Log.wtf(TAG, "Failed to get board state", e);
+        }
+        return o;
+    };
 }

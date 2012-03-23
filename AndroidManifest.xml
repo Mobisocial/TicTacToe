@@ -6,12 +6,21 @@
     <uses-sdk android:minSdkVersion="6" />
 
     <application android:icon="@drawable/icon" android:label="@string/app_name">
-        <activity android:name=".TicTacToeActivity"
+        <activity android:name=".TicTacToeMainActivity"
                   android:label="@string/app_name">
             <intent-filter>
-                <action android:name="mobisocial.intent.action.TWO_PLAYERS" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="musubi.intent.category.MENU" />
+                <category android:name="musubi.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+		<activity android:name=".TicTacToeActivity"
+                  android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.musubi.obj/tictactoe"/>
             </intent-filter>
         </activity>
 
