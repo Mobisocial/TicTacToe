@@ -37,7 +37,7 @@ public class TicTacToeActivity extends Activity {
         mTokenButton = (Button)findViewById(R.id.token);
 
         // Set up the game's backend:
-        mMultiplayer = new TTTMultiplayer(Musubi.getContextObj(this, getIntent()));
+        mMultiplayer = new TTTMultiplayer(new Musubi(this).objFromIntent(getIntent()));
 
         // Bind UI to actions:
         mmSquares.add((Button)findViewById(R.id.s0));
