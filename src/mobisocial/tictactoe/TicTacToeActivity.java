@@ -59,6 +59,18 @@ public class TicTacToeActivity extends Activity {
         render(mMultiplayer.getLatestState());
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mMultiplayer.enableStateUpdates();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mMultiplayer.disableStateUpdates();
+    }
+
     /**
      * Extracts the board state from the given json object and
      * renders it to screen.

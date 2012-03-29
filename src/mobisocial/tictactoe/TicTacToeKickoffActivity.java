@@ -15,7 +15,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Toast;
 
-public class TicTacToeMainActivity extends Activity {
+public class TicTacToeKickoffActivity extends Activity {
     final String type = "tictactoe";
 
     @Override
