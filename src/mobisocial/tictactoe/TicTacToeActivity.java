@@ -37,7 +37,8 @@ public class TicTacToeActivity extends Activity {
         mTokenButton = (Button)findViewById(R.id.token);
 
         // Set up the game's backend:
-        mMultiplayer = new TTTMultiplayer(new Musubi(this).objFromIntent(getIntent()));
+        Musubi musubi = new Musubi(this);
+        mMultiplayer = new TTTMultiplayer(musubi, musubi.objFromIntent(getIntent()));
 
         // Bind UI to actions:
         mmSquares.add((Button)findViewById(R.id.s0));
@@ -141,8 +142,8 @@ public class TicTacToeActivity extends Activity {
     private class TTTMultiplayer extends TurnBasedApp {
         private final String mToken;
 
-        public TTTMultiplayer(DbObj objContext) {
-            super(objContext);
+        public TTTMultiplayer(Musubi musubi, DbObj objContext) {
+            super(musubi, objContext);
             // First player is X, second is O. getLocalMemberIndex() returns
             // the player corresponding to this device:
             mToken = (getLocalMemberIndex() == 0) ? "X" : "O";
