@@ -140,17 +140,18 @@ public class TicTacToeActivity extends Activity {
     };
 
     private class TTTMultiplayer extends TurnBasedApp {
-        private final String mToken;
+        private String mToken = null;
 
         public TTTMultiplayer(Musubi musubi, DbObj objContext) {
             super(musubi, objContext);
-            // First player is X, second is O. getLocalMemberIndex() returns
-            // the player corresponding to this device:
-            mToken = (getLocalMemberIndex() == 0) ? "X" : "O";
-
         }
 
         public String getPlayerToken() {
+        	// First player is X, second is O. getLocalMemberIndex() returns
+            // the player corresponding to this device:
+        	if(mToken == null) {
+        		mToken = (getLocalMemberIndex() == 0) ? "X" : "O";
+        	}
             return mToken;
         }
 
